@@ -59,7 +59,6 @@ def search_uuid(computername,session):
     try:
         url = f'{wapt_url}/api/v3/hosts?filter=computer_name:{computername}&reachable=1&columns=uuid,computer_name&limit=2000'
         response = session.get(url)
-        # logging.error(response.status_code)
         if response.status_code == 200:
             try:
                 data = response.json()
@@ -68,14 +67,14 @@ def search_uuid(computername,session):
                         return asset['uuid']
                 return "Asset not found"  # Return not found after checking all assets
             except requests.exceptions.JSONDecodeError:
-                print("Received non-JSON response from the server.")
-                return None  # Return None or raise an exception if JSON decoding fails
+                logger.error("Received non-JSON response from the server.")
+                return None
         else:
-            print("Request failed with status code:", response.status_code)
-            return None  # Return None if the request itself failed
+            logger.error("Request failed with status code: %s", response.status_code)
+            return None
     except requests.exceptions.RequestException as e:
-        print("An error occurred:", e)
-        return None  # Return None or handle specific exceptions if needed
+        logger.exception("An error occurred: %s", e)
+        return None
 
 
 def get_session_wapt(user,password):
@@ -170,6 +169,10 @@ def install_package():
 
     result = find_software(response.json(), soft_name,s)
 
+    if not result:
+        logger.info("No packet match found for %s", ' '.join(soft_name))
+        return "No packet match was found for %s" % ' '.join(soft_name), 404
+
     package = result['package']
 
     logger.info(package)
@@ -239,4 +242,4 @@ def install_package():
                 os.unlink(tmp_fn)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='127.0.0.1', port=5000)

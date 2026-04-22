@@ -13,7 +13,7 @@
 4. **Préparation du serveur :** Placez les fichiers `wapt.py`, `integration.conf`, le fichier `.crt` et le fichier `.pem` du certificat WAPT sur le serveur Cyberwatch. 
 
 Note : il faut que le serveur avec `wapt.py` soit équipé d'un agent WAPT afin d'avoir les dépendances nécessaires pour l'intégration.
-Si nécessaire, l'agent WAPT est disponible à cette adresse : [https://wapt.tranquil.it/wapt/releases/latest/](https://wapt.tranquil.it/wapt/releases/latest/)
+Si nécessaire, consultez la documentation officielle pour déployer l'agent WAPT sur Linux : [https://www.wapt.fr/fr/doc-2.6/wapt-deploy-agent.html#deploying-the-wapt-agent-on-linux-and-macos](https://www.wapt.fr/fr/doc-2.6/wapt-deploy-agent.html#deploying-the-wapt-agent-on-linux-and-macos)
 
 Exécutez ensuite la commande suivante sur le serveur pour installer la dépendance `fuzzywuzzy` :
 `sudo /opt/wapt/bin/python -m pip install fuzzywuzzy`
@@ -21,7 +21,9 @@ Exécutez ensuite la commande suivante sur le serveur pour installer la dépenda
 Cette bibliothèque est nécessaire pour que l’intégration WAPT/Cyberwatch fonctionne correctement.
 
 5. **Configuration :** Modifiez le fichier `integration.conf` en insérant les valeurs appropriées et les clés d'API Cyberwatch.
-    Depuis la version 2.5, la plupart des URL d’API est protégée par des certificats clients SSL (ssl_pem_client_location et ssl_cert_client_location dans integarations.conf). Vous pouvez les trouver dans `/opt/wapt/conf`.
+    Depuis la version 2.5, la plupart des URL d’API est protégée par des certificats clients SSL (ssl_pem_client_location et ssl_cert_client_location dans integarations.conf). Pour trouver la clé / certificat, le plus simple est de consulter **Outils > Préférences de la console WAPT** et de lire le fichier présenté dans le champ **Chemin du certificat personnel**. Le chemin sera généralement `C:\Users\<User>\private\` et la clé est présente dans le même dossier que le certificat.
+
+    ![Configuration WAPT locale - Chemin du certificat personnel](wapt_console_preferences.png)
 
 6. **Test :** Pour tester le fonctionnement, lancez le proxy en utilisant la commande ` sudo /opt/wapt/waptpython.sh wapt.py`.
 
@@ -30,7 +32,7 @@ Cette bibliothèque est nécessaire pour que l’intégration WAPT/Cyberwatch fo
 7. **Intégration à Cyberwatch :** dans la section "Administration/Integrations" de Cyberwatch, ajoutez une intégration avec la configuration suivante :
 
     - Emplacement : Onglet "Gestion de Correctifs"
-    - URL de la requête : `https://[IP SERVEUR CBW]:5000/install_package`
+    - URL de la requête : `http://[IP SERVEUR CBW]:5000/install_package`
     - En-têtes : `{"content-type":"application/json"}`
     - Corps de la requête :
 
@@ -61,7 +63,7 @@ Group=<group>
 WorkingDirectory=</chemin/vers/votre/app>
 Environment="FLASK_APP=wapt.py"
 Environment="FLASK_ENV=development"
-ExecStart=/opt/wapt/waptpython </chemin/vers/votre/app/wapt.py>
+ExecStart=/opt/wapt/waptpython.sh </chemin/vers/votre/app/wapt.py>
 
 [Install]
 WantedBy=multi-user.target
